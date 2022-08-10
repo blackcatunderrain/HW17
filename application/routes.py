@@ -33,6 +33,12 @@ class MoviesView(Resource):
         movies = movies_query.all()
         return movies_schema.dump(movies), 200
 
+    def post(self):
+        movie = movie_schema.load(request.json)
+        db.session.add(models.Movie(**movie))
+        db.session.commit()
+        return None, 201
+
 
 @movies_ns.route('/<int:movie_id>')
 class MovieView(Resource):
@@ -41,6 +47,16 @@ class MovieView(Resource):
         if movie is None:
             return {}, 404
         return movie_schema.dump(movie), 200
+
+    def put(self, movie_id):
+        db.session.query(models.Movie).filter(models.Movie.id == movie_id).update(request.json)
+        db.session.commit()
+        return None, 200
+
+    def delete(self, movie_id):
+        db.session.query(models.Movie).filter(models.Movie.id == movie_id).delete()
+        db.session.commit()
+        return None, 204
 
 
 @directors_ns.route('/')
